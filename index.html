@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Station Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    
+    <style>
+        /* Modern, clean styling */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: auto; }
+        h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; font-weight: 600; }
+        
+        /* The Top Cards Layout */
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .card { background: white; padding: 25px 15px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); text-align: center; transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { margin: 0 0 10px 0; color: #7f8c8d; font-size: 1.1em; text-transform: uppercase; letter-spacing: 1px; }
+        .card .value { font-size: 2.5em; font-weight: bold; color: #2c3e50; }
+        .card .unit { font-size: 0.9em; color: #95a5a6; font-weight: 500; }
+        
+        /* The Charts Layout */
+        .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 20px; }
+        .chart-container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌤️ Live Weather & Air Quality</h1>
+        
+        <div class="grid">
+            <div class="card"><h3>Temperature</h3><div class="value" id="val-temp">--</div><div class="unit">°C</div></div>
+            <div class="card"><h3>Humidity</h3><div class="value" id="val-hum">--</div><div class="unit">%</div></div>
+            <div class="card"><h3>PM 2.5</h3><div class="value" id="val-pm">--</div><div class="unit">µg/m³</div></div>
+            <div class="card"><h3>CO2</h3><div class="value" id="val-co2">--</div><div class="unit">ppm</div></div>
+            <div class="card"><h3>Light</h3><div class="value" id="val-lux">--</div><div class="unit">lux</div></div>
+            <div class="card"><h3>Pressure</h3><div class="value" id="val-press">--</div><div class="unit">hPa</div></div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-container"><canvas id="envChart"></canvas></div>
+            <div class="chart-container"><canvas id="aqiChart"></canvas></div>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSPXP92EqtheXrh3Z20EyP8SicTPMdIuM1Lcn12xnfhTKZhzXnv8Mrp4AXB5D8zp0VUPVcZPmaeSnzK/pub?output=csv";
+
+        let envChartInstance = null;
+        let aqiChartInstance = null;
+
+        function fetchData() {
+            // Read the CSV directly from the web
+            Papa.parse(SHEET_CSV_URL, {
+                download: true,
+                header: false,
+                complete: function(results) {
+                    const data = results.data;
+                    if(data.length < 2) return; 
+
+                    // Filter out any empty rows at the bottom of the sheet
+                    const validData = data.filter(row => row.length >= 8 && row[0] !== "");
+                    
+                    // 1. UPDATE THE CARDS (Grab the very last row of the sheet)
+                    const latest = validData[validData.length - 1];
+                    document.getElementById('val-temp').innerText = latest[2] || '--';
+                    document.getElementById('val-hum').innerText = latest[3] || '--';
+                    document.getElementById('val-lux').innerText = latest[4] || '--';
+                    document.getElementById('val-co2').innerText = latest[5] || '--';
+                    document.getElementById('val-pm').innerText = latest[6] || '--';
+                    document.getElementById('val-press').innerText = latest[7] || '--';
+
+                    // 2. PREPARE DATA FOR CHARTS (Grab the last 20 rows)
+                    const chartData = validData.slice(-20);
+                    
+                    const labels = chartData.map(row => {
+                        let d = new Date(row[0]);
+                        return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
+                    });
+                    
+                    const temps = chartData.map(row => parseFloat(row[2]));
+                    const hums = chartData.map(row => parseFloat(row[3]));
+                    const pm25 = chartData.map(row => parseFloat(row[6]));
+                    const co2 = chartData.map(row => parseFloat(row[5]));
+
+                    // Update the graphs with the new data
+                    updateCharts(labels, temps, hums, pm25, co2);
+                }
+            });
+        }
+
+        function updateCharts(labels, temps, hums, pm25, co2) {
+            const envCtx = document.getElementById('envChart').getContext('2d');
+            const aqiCtx = document.getElementById('aqiChart').getContext('2d');
+
+            // Destroy old charts before drawing new ones to prevent overlapping glitches
+            if (envChartInstance) envChartInstance.destroy();
+            if (aqiChartInstance) aqiChartInstance.destroy();
+
+            // Draw Temperature & Humidity Chart
+            envChartInstance = new Chart(envCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Temperature (°C)', data: temps, borderColor: '#e74c3c', backgroundColor: 'rgba(231, 76, 60, 0.1)', fill: true, tension: 0.4 },
+                        { label: 'Humidity (%)', data: hums, borderColor: '#3498db', backgroundColor: 'rgba(52, 152, 219, 0.1)', fill: true, tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, plugins: { title: { display: true, text: 'Environment Trends', font: {size: 16} } } }
+            });
+
+            // Draw Air Quality Chart
+            aqiChartInstance = new Chart(aqiCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'PM 2.5 (µg/m³)', data: pm25, borderColor: '#9b59b6', backgroundColor: 'rgba(155, 89, 182, 0.1)', fill: true, tension: 0.4 },
+                        // Note: CO2 is divided by 10 just so it fits nicely on the same graph as PM2.5!
+                        { label: 'CO2 (Scaled / 10)', data: co2.map(v => v/10), borderColor: '#2ecc71', backgroundColor: 'rgba(46, 204, 113, 0.1)', fill: true, tension: 0.4 } 
+                    ]
+                },
+                options: { responsive: true, plugins: { title: { display: true, text: 'Air Quality Trends', font: {size: 16} } } }
+            });
+        }
+
+        // Fetch the data immediately when the page loads, then update every 10 seconds
+        fetchData();
+        setInterval(fetchData, 10000);
+    </script>
+</body>
+</html>
