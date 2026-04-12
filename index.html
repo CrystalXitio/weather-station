@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather Station</title>
+    <title>Atmosphere Titanium OS</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
@@ -32,95 +32,68 @@
 
         .container { max-width: 1400px; margin: auto; }
 
-        header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
+        header { text-align: center; margin-bottom: 60px; }
 
         .branding {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.03);
-            padding: 8px 20px;
-            border-radius: 100px;
-            border: 1px solid var(--border);
-            margin-bottom: 20px;
+            display: inline-flex; align-items: center; gap: 12px;
+            background: rgba(255, 255, 255, 0.03); padding: 8px 20px;
+            border-radius: 100px; border: 1px solid var(--border); margin-bottom: 20px;
         }
 
         .pulse {
-            width: 10px; height: 10px;
-            background: #00ff88;
-            border-radius: 50%;
-            box-shadow: 0 0 15px #00ff88;
+            width: 10px; height: 10px; background: #00ff88;
+            border-radius: 50%; box-shadow: 0 0 15px #00ff88;
             animation: pulse-ring 2s infinite;
         }
 
         @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
 
         h1 { 
-            font-size: 2.8rem; 
-            font-weight: 700; 
-            margin: 0; 
-            letter-spacing: -1px;
+            font-size: 2.8rem; font-weight: 700; margin: 0; letter-spacing: -1px;
             background: linear-gradient(to bottom, #fff 30%, #64748b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
 
-        /* Centered Flex Grid: This keeps things centralized regardless of sensor count */
         .chart-grid { 
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 25px;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 25px;
         }
 
         .sensor-card { 
-            flex: 1 1 400px;
-            max-width: 450px;
-            background: var(--card-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 32px;
-            padding: 30px;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            position: relative;
+            flex: 1 1 400px; max-width: 450px;
+            background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 32px; padding: 30px;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); position: relative;
         }
 
         .sensor-card:hover {
-            transform: translateY(-8px);
-            border-color: rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.05);
+            transform: translateY(-8px); border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05);
+        }
+
+        .card-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
         }
 
         .label-group h3 {
-            margin: 0;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-dim);
+            margin: 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim);
         }
+
+        .time-select {
+            background: rgba(0, 0, 0, 0.3); color: var(--text-dim);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 4px 8px; font-size: 0.7rem; font-family: 'Plus Jakarta Sans', sans-serif;
+            cursor: pointer; outline: none; transition: border 0.2s;
+        }
+
+        .time-select:hover { border-color: var(--accent); color: #fff; }
+        .time-select option { background: var(--bg); color: #fff; }
 
         .sensor-value { 
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 2.8rem; 
-            font-weight: 500; 
-            color: #fff;
+            font-family: 'JetBrains Mono', monospace; font-size: 2.8rem; font-weight: 500; color: #fff; display: inline-block; margin-top: 5px;
         }
 
-        .sensor-unit { 
-            font-size: 1rem; 
-            color: var(--accent); 
-            margin-left: 8px;
-        }
+        .sensor-unit { font-size: 1rem; color: var(--accent); margin-left: 8px; }
 
-        canvas { 
-            width: 100% !important; 
-            height: 180px !important; 
-            margin-top: 20px;
-        }
+        canvas { width: 100% !important; height: 180px !important; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -135,23 +108,82 @@
         
         <div class="chart-grid">
             <div class="sensor-card">
-                <div class="label-group"><h3>Temperature</h3><span class="sensor-value" id="val-temp">--</span><span class="sensor-unit">°C</span></div>
+                <div class="card-header">
+                    <div class="label-group"><h3>Temperature</h3></div>
+                    <select class="time-select" id="range-temp" onchange="renderSpecificChart('temp')">
+                        <option value="1">1 HR</option>
+                        <option value="6">6 HR</option>
+                        <option value="12">12 HR</option>
+                        <option value="24">1 DAY</option>
+                        <option value="168">1 WEEK</option>
+                        <option value="max">MAX</option>
+                    </select>
+                </div>
+                <div><span class="sensor-value" id="val-temp">--</span><span class="sensor-unit">°C</span></div>
                 <canvas id="chart-temp"></canvas>
             </div>
+
             <div class="sensor-card">
-                <div class="label-group"><h3>Humidity</h3><span class="sensor-value" id="val-hum">--</span><span class="sensor-unit">%</span></div>
+                <div class="card-header">
+                    <div class="label-group"><h3>Humidity</h3></div>
+                    <select class="time-select" id="range-hum" onchange="renderSpecificChart('hum')">
+                        <option value="1">1 HR</option>
+                        <option value="6">6 HR</option>
+                        <option value="12">12 HR</option>
+                        <option value="24">1 DAY</option>
+                        <option value="168">1 WEEK</option>
+                        <option value="max">MAX</option>
+                    </select>
+                </div>
+                <div><span class="sensor-value" id="val-hum">--</span><span class="sensor-unit">%</span></div>
                 <canvas id="chart-hum"></canvas>
             </div>
+
             <div class="sensor-card">
-                <div class="label-group"><h3>CO2 Level</h3><span class="sensor-value" id="val-co2">--</span><span class="sensor-unit">PPM</span></div>
+                <div class="card-header">
+                    <div class="label-group"><h3>CO2 Level</h3></div>
+                    <select class="time-select" id="range-co2" onchange="renderSpecificChart('co2')">
+                        <option value="1">1 HR</option>
+                        <option value="6">6 HR</option>
+                        <option value="12">12 HR</option>
+                        <option value="24">1 DAY</option>
+                        <option value="168">1 WEEK</option>
+                        <option value="max">MAX</option>
+                    </select>
+                </div>
+                <div><span class="sensor-value" id="val-co2">--</span><span class="sensor-unit">PPM</span></div>
                 <canvas id="chart-co2"></canvas>
             </div>
+
             <div class="sensor-card">
-                <div class="label-group"><h3>Light</h3><span class="sensor-value" id="val-lux">--</span><span class="sensor-unit">LUX</span></div>
+                <div class="card-header">
+                    <div class="label-group"><h3>Light</h3></div>
+                    <select class="time-select" id="range-lux" onchange="renderSpecificChart('lux')">
+                        <option value="1">1 HR</option>
+                        <option value="6">6 HR</option>
+                        <option value="12">12 HR</option>
+                        <option value="24">1 DAY</option>
+                        <option value="168">1 WEEK</option>
+                        <option value="max">MAX</option>
+                    </select>
+                </div>
+                <div><span class="sensor-value" id="val-lux">--</span><span class="sensor-unit">LUX</span></div>
                 <canvas id="chart-lux"></canvas>
             </div>
+
             <div class="sensor-card">
-                <div class="label-group"><h3>Pressure</h3><span class="sensor-value" id="val-press">--</span><span class="sensor-unit">hPa</span></div>
+                <div class="card-header">
+                    <div class="label-group"><h3>Pressure</h3></div>
+                    <select class="time-select" id="range-press" onchange="renderSpecificChart('press')">
+                        <option value="1">1 HR</option>
+                        <option value="6">6 HR</option>
+                        <option value="12">12 HR</option>
+                        <option value="24">1 DAY</option>
+                        <option value="168">1 WEEK</option>
+                        <option value="max">MAX</option>
+                    </select>
+                </div>
+                <div><span class="sensor-value" id="val-press">--</span><span class="sensor-unit">hPa</span></div>
                 <canvas id="chart-press"></canvas>
             </div>
         </div>
@@ -160,13 +192,15 @@
     <script>
         const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSPXP92EqtheXrh3Z20EyP8SicTPMdIuM1Lcn12xnfhTKZhzXnv8Mrp4AXB5D8zp0VUPVcZPmaeSnzK/pub?output=csv";
         
+        let globalRawData = []; // Cache to store sheet data so dropdowns react instantly
         const chartInstances = {};
+        
         const sensorConfig = {
-            temp: { color: '#ff3e3e' },
-            hum: { color: '#00d2ff' },
-            co2: { color: '#32d74b' },
-            lux: { color: '#ffd60a' },
-            press: { color: '#94a3b8' }
+            temp: { colIdx: 2, color: '#ff3e3e', unit: '°C' },
+            hum: { colIdx: 3, color: '#00d2ff', unit: '%' },
+            co2: { colIdx: 5, color: '#32d74b', unit: 'PPM' },
+            lux: { colIdx: 4, color: '#ffd60a', unit: 'LUX' },
+            press: { colIdx: 7, color: '#94a3b8', unit: 'hPa' }
         };
 
         function fetchData() {
@@ -177,38 +211,64 @@
                     const data = results.data;
                     if(data.length < 2) return; 
 
-                    // Filter out any empty rows at the bottom of the sheet
-                    const validData = data.filter(row => row.length >= 8 && row[0] !== "");
+                    // Filter valid rows and cache them globally
+                    globalRawData = data.filter(row => row.length >= 8 && row[0] !== "");
                     
-                    // 1. UPDATE THE CARDS (Grab the very last row of the sheet)
-                    const latest = validData[validData.length - 1];
+                    // Update Text Values with the very latest row
+                    const latest = globalRawData[globalRawData.length - 1];
                     document.getElementById('val-temp').innerText = latest[2] || '--';
                     document.getElementById('val-hum').innerText = latest[3] || '--';
                     document.getElementById('val-lux').innerText = latest[4] || '--';
                     document.getElementById('val-co2').innerText = latest[5] || '--';
                     document.getElementById('val-press').innerText = latest[7] || '--';
 
-                    // 2. PREPARE DATA FOR CHARTS (Grab the last 20 rows)
-                    const chartData = validData.slice(-20);
-                    const labels = chartData.map(row => {
-                        let d = new Date(row[0]);
-                        return d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0');
-                    });
-
-                    // 3. UPDATE INDIVIDUAL CHARTS
-                    updateChart('temp', labels, chartData.map(row => parseFloat(row[2])));
-                    updateChart('hum', labels, chartData.map(row => parseFloat(row[3])));
-                    updateChart('lux', labels, chartData.map(row => parseFloat(row[4])));
-                    updateChart('co2', labels, chartData.map(row => parseFloat(row[5])));
-                    updateChart('press', labels, chartData.map(row => parseFloat(row[7])));
+                    // Re-render all charts based on their individual dropdown selections
+                    Object.keys(sensorConfig).forEach(id => renderSpecificChart(id));
                 }
             });
         }
 
-        function updateChart(id, labels, data) {
+        function renderSpecificChart(id) {
+            if (globalRawData.length === 0) return;
+
+            // 1. Find the target timeframe in milliseconds
+            const rangeVal = document.getElementById('range-' + id).value;
+            const latestTime = new Date(globalRawData[globalRawData.length - 1][0]).getTime();
+            
+            let filteredData = globalRawData;
+
+            // 2. Filter the data if it isn't "max"
+            if (rangeVal !== 'max') {
+                const hoursMs = parseInt(rangeVal) * 60 * 60 * 1000;
+                filteredData = globalRawData.filter(row => {
+                    const rowTime = new Date(row[0]).getTime();
+                    return (latestTime - rowTime) <= hoursMs;
+                });
+            }
+
+            // Fallback if filtering removed everything (e.g., no data in the last 1 hour)
+            if(filteredData.length === 0) filteredData = [globalRawData[globalRawData.length - 1]];
+
+            // 3. Format the X-Axis Labels nicely based on the timeframe
+            const labels = filteredData.map(row => {
+                let d = new Date(row[0]);
+                let hhmm = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+                if (rangeVal === '1') {
+                    return hhmm + ':' + String(d.getSeconds()).padStart(2, '0'); // Show seconds for 1 Hr
+                } else if (rangeVal === '168' || rangeVal === 'max') {
+                    return d.getDate() + '/' + (d.getMonth()+1) + ' ' + hhmm; // Show Dates for long ranges
+                }
+                return hhmm; 
+            });
+
+            const plotData = filteredData.map(row => parseFloat(row[sensorConfig[id].colIdx]));
+
+            updateChartUI(id, labels, plotData);
+        }
+
+        function updateChartUI(id, labels, data) {
             const ctx = document.getElementById('chart-' + id).getContext('2d');
             
-            // Destroy old charts to prevent overlapping glitches on refresh
             if (chartInstances[id]) chartInstances[id].destroy();
 
             chartInstances[id] = new Chart(ctx, {
@@ -220,6 +280,10 @@
                         borderColor: sensorConfig[id].color,
                         borderWidth: 3,
                         pointRadius: 0,
+                        pointHoverRadius: 6, 
+                        pointHoverBackgroundColor: '#ffffff',
+                        pointHoverBorderColor: sensorConfig[id].color,
+                        pointHoverBorderWidth: 2,
                         fill: true,
                         backgroundColor: sensorConfig[id].color + '15',
                         tension: 0.4
@@ -228,10 +292,42 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(10, 15, 26, 0.95)', 
+                            titleColor: '#94a3b8', 
+                            titleFont: { family: "'Plus Jakarta Sans', sans-serif", size: 12 },
+                            bodyColor: '#ffffff',
+                            bodyFont: { family: "'JetBrains Mono', monospace", size: 15, weight: 'bold' },
+                            borderColor: sensorConfig[id].color + '80', 
+                            borderWidth: 1,
+                            padding: 12,
+                            displayColors: false, 
+                            callbacks: {
+                                title: function(context) { return 'Time: ' + context[0].label; },
+                                label: function(context) { return 'Reading: ' + context.parsed.y + ' ' + sensorConfig[id].unit; }
+                            }
+                        }
+                    },
                     scales: {
-                        x: { display: false },
-                        y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b' } }
+                        x: { 
+                            display: true, 
+                            grid: { display: false },
+                            ticks: { 
+                                color: '#64748b',
+                                maxTicksLimit: 6, // Prevents labels from overlapping
+                                maxRotation: 0
+                            } 
+                        },
+                        y: { 
+                            grid: { color: 'rgba(255,255,255,0.03)' }, 
+                            ticks: { color: '#64748b' } 
+                        }
                     }
                 }
             });
