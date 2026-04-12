@@ -143,10 +143,6 @@
                 <canvas id="chart-hum"></canvas>
             </div>
             <div class="sensor-card">
-                <div class="label-group"><h3>Particulates</h3><span class="sensor-value" id="val-pm">--</span><span class="sensor-unit">µg/m³</span></div>
-                <canvas id="chart-pm"></canvas>
-            </div>
-            <div class="sensor-card">
                 <div class="label-group"><h3>CO2 Level</h3><span class="sensor-value" id="val-co2">--</span><span class="sensor-unit">PPM</span></div>
                 <canvas id="chart-co2"></canvas>
             </div>
@@ -168,7 +164,6 @@
         const sensorConfig = {
             temp: { color: '#ff3e3e' },
             hum: { color: '#00d2ff' },
-            pm: { color: '#bf5af2' },
             co2: { color: '#32d74b' },
             lux: { color: '#ffd60a' },
             press: { color: '#94a3b8' }
@@ -191,7 +186,6 @@
                     document.getElementById('val-hum').innerText = latest[3] || '--';
                     document.getElementById('val-lux').innerText = latest[4] || '--';
                     document.getElementById('val-co2').innerText = latest[5] || '--';
-                    document.getElementById('val-pm').innerText = latest[6] || '--';
                     document.getElementById('val-press').innerText = latest[7] || '--';
 
                     // 2. PREPARE DATA FOR CHARTS (Grab the last 20 rows)
@@ -206,7 +200,6 @@
                     updateChart('hum', labels, chartData.map(row => parseFloat(row[3])));
                     updateChart('lux', labels, chartData.map(row => parseFloat(row[4])));
                     updateChart('co2', labels, chartData.map(row => parseFloat(row[5])));
-                    updateChart('pm', labels, chartData.map(row => parseFloat(row[6])));
                     updateChart('press', labels, chartData.map(row => parseFloat(row[7])));
                 }
             });
