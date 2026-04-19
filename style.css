@@ -1,0 +1,278 @@
+:root {
+    --bg-primary: #0a0f1a;
+    --bg-secondary: #121826;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --border: rgba(255, 255, 255, 0.08);
+    --text-main: #ffffff;
+    --text-dim: #94a3b8;
+    --accent: #00d2ff;
+    --glass-blur: 20px;
+    
+    --color-temp: #ff3e3e;
+    --color-hum: #00d2ff;
+    --color-co2: #32d74b;
+    --color-lux: #ffd60a;
+    --color-press: #94a3b8;
+}
+
+body { 
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    background-color: var(--bg-primary);
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(0, 210, 255, 0.07) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(147, 51, 234, 0.07) 0px, transparent 50%);
+    background-attachment: fixed;
+    color: var(--text-main);
+    margin: 0;
+    padding: 40px 20px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container { 
+    max-width: 1400px; 
+    margin: 0 auto; 
+    flex: 1;
+    width: 100%;
+}
+
+/**
+ * Layout & Typography
+ */
+
+header { 
+    text-align: center; 
+    margin-bottom: 60px; 
+    animation: fadeInDown 0.8s ease-out forwards;
+}
+
+.branding {
+    display: inline-flex; 
+    align-items: center; 
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.04); 
+    padding: 8px 24px;
+    border-radius: 100px; 
+    border: 1px solid var(--border); 
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0, 255, 136, 0.05);
+    transition: all 0.3s ease;
+}
+
+.branding:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(0, 255, 136, 0.3);
+}
+
+.pulse {
+    width: 10px; height: 10px; 
+    background: #00ff88;
+    border-radius: 50%; 
+    box-shadow: 0 0 15px #00ff88;
+    animation: pulse-ring 2s infinite;
+}
+
+.branding-text {
+    font-size: 0.75rem; 
+    letter-spacing: 3px; 
+    font-weight: 700; 
+    color: #00ff88;
+}
+
+h1 { 
+    font-size: 3rem; 
+    font-weight: 700; 
+    margin: 0; 
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #ffffff 30%, #64748b 100%);
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent;
+}
+
+h1 span {
+    font-weight: 200;
+}
+
+.chart-grid { 
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 25px;
+}
+
+/**
+ * Component: Sensor Card
+ */
+
+.sensor-card { 
+    flex: 1 1 400px; 
+    max-width: 450px;
+    background: var(--card-bg); 
+    backdrop-filter: blur(var(--glass-blur)); 
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--border); 
+    border-radius: 24px; 
+    padding: 30px;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); 
+    position: relative;
+    overflow: hidden;
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.sensor-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.sensor-card:hover {
+    transform: translateY(-6px); 
+    border-color: rgba(255, 255, 255, 0.15); 
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.sensor-card:hover::before {
+    opacity: 1;
+}
+
+.card-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start;
+}
+
+.label-group h3 {
+    margin: 0; 
+    font-size: 0.85rem; 
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
+.time-select {
+    background: rgba(0, 0, 0, 0.4); 
+    color: var(--text-dim);
+    border: 1px solid var(--border); 
+    border-radius: 8px;
+    padding: 6px 10px; 
+    font-size: 0.75rem; 
+    font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer; 
+    outline: none; 
+    transition: all 0.2s ease;
+}
+
+.time-select:hover, .time-select:focus { 
+    border-color: var(--accent); 
+    color: #fff; 
+}
+.time-select option { 
+    background: var(--bg-secondary); 
+    color: #fff; 
+}
+
+.value-container {
+    margin-top: 10px;
+    display: flex;
+    align-items: baseline;
+    height: 50px;
+}
+
+.sensor-value { 
+    font-family: 'JetBrains Mono', monospace; 
+    font-size: 3rem; 
+    font-weight: 500; 
+    color: #fff; 
+    display: inline-block; 
+    letter-spacing: -1px;
+}
+
+.sensor-value.loading {
+    animation: shimmer 1.5s infinite linear;
+    background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%);
+    background-size: 200% 100%;
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.sensor-unit { 
+    font-size: 1.1rem; 
+    font-weight: 600;
+    color: var(--accent); 
+    margin-left: 8px; 
+    opacity: 0.9;
+}
+
+#unit-temp { color: var(--color-temp); }
+#unit-hum { color: var(--color-hum); }
+#unit-co2 { color: var(--color-co2); }
+#unit-lux { color: var(--color-lux); }
+#unit-press { color: var(--color-press); }
+
+.chart-container {
+    position: relative;
+    height: 180px;
+    width: 100%;
+    margin-top: 25px;
+}
+
+canvas { 
+    width: 100% !important; 
+    height: 100% !important; 
+}
+
+footer {
+    text-align: center;
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+}
+
+/**
+ * Animations
+ */
+
+@keyframes pulse-ring { 
+    0% { transform: scale(0.8); opacity: 0.5; } 
+    50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 20px #00ff88; } 
+    100% { transform: scale(0.8); opacity: 0.5; } 
+}
+
+@keyframes shimmer {
+    to { background-position: -200% 0; }
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.sensor-card:nth-child(1) { animation-delay: 0.1s; }
+.sensor-card:nth-child(2) { animation-delay: 0.2s; }
+.sensor-card:nth-child(3) { animation-delay: 0.3s; }
+.sensor-card:nth-child(4) { animation-delay: 0.4s; }
+.sensor-card:nth-child(5) { animation-delay: 0.5s; }
+
+@media (max-width: 768px) {
+    h1 { font-size: 2.2rem; }
+    .sensor-card { padding: 20px; border-radius: 20px; }
+    .sensor-value { font-size: 2.2rem; }
+}
