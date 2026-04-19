@@ -42,3 +42,6 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Arduino Files
+*.ino
